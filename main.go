@@ -1,16 +1,18 @@
+// Copyright 2014 The cli Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package main
 
 import (
 	"github.com/gorilla/mux"
+	tasks "github.com/jbydeley/go-task-lib"
 	"gopkg.in/unrolled/render.v1"
 	"net/http"
 	"strconv"
-	"todo"
 )
 
-var (
-	tService todo.TasksService
-)
+var tService tasks.TasksService
 
 func main() {
 	c := &TasksController{Render: render.New(render.Options{})}
@@ -34,11 +36,12 @@ func main() {
 type Action func(rw http.ResponseWriter, r *http.Request) error
 
 // This is our Base Controller
-type AppController struct{}
+type BaseController struct{}
 
 // The action function helps with error handling in a controller
-func (c *AppController) Action(a Action) http.Handler {
+func (c *BaseController) Action(a Action) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		rw.Header().Set("Access-Control-Allow-Origin", "http://localhost:8081")
 		if err := a(rw, r); err != nil {
 			http.Error(rw, err.Error(), 500)
 		}
@@ -46,7 +49,7 @@ func (c *AppController) Action(a Action) http.Handler {
 }
 
 type TasksController struct {
-	AppController
+	BaseController
 	*render.Render
 }
 
